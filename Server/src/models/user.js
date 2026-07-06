@@ -19,16 +19,7 @@ const UserSchema = new mongoose.Schema({
     unique: [true, "mast be unique"],
     loveCase: true,
   },
-  role: {
-    type: String,
-    enum: ["super user", "admin", "user"],
-    default: "user",
-  },
-  department: {
-    type: String,
-    enum: ["1", "2", "3"],
-    required: true,
-  },
+
   password: {
     type: String,
     required: true,

@@ -13,68 +13,8 @@ if (process.env.NODE_ENV === "production") {
   cookieOptions.secure = true; // Використовується HTTPS в продакшні
 }
 
-export const getAllUserHandler = async function (req, reply) {
-  try {
-    const user = await findAll();
-
-    reply.status(200).send(user);
-  } catch (error) {
-    reply.status(404).send(error);
-  }
-};
-export const getUserHandler = async function (req, reply) {
-  try {
-    const params = req.params.id;
-    const user = await findOneByUniqueField(params);
-    reply.status(200).send(user);
-  } catch (error) {
-    reply.status(404).send(error);
-  }
-};
-
-export const addUserHandler = async function (req, reply) {
-  try {
-    const newUser = req.body;
-    console.log(req.body);
-
-    const addUser = await createOne(newUser);
-    reply.status(201).send(addUser);
-  } catch (error) {
-    if (error.status === 11000) {
-      reply.status(400).send(`${error.message}, email mast be unique`);
-    }
-
-    reply.status(404).send(error);
-  }
-};
-
-export const patchUserHandler = async function (req, reply) {
-  try {
-    const patch = await updateOne(req.params.id, req.body);
-    reply.status(200).send(patch);
-  } catch (error) {
-    reply.status(404).send(error);
-  }
-};
-
-export const deleteUserHandler = async function (req, reply) {
-  try {
-    const deleteUser = await deleteOne({ _id: req.params.id });
-    if (!deleteUser) {
-      reply.status(404).send(`User with id ${req.params.id} is not existed`);
-    }
-    reply.status(200).send(deleteUser);
-  } catch (error) {
-    reply.status(400).send(error.message);
-  }
-  y;
-};
-
 export const loginHandler = async function (req, reply) {
   try {
-    console.log("====================================");
-    console.log(req.body.email);
-    console.log("====================================");
     const user = await req.server.prisma.user.findUnique({
       where: { email: req.body.email },
     });
@@ -130,20 +70,28 @@ export const logoutHandler = async function (req, reply) {
 
 export const registrationHandler = async function (req, reply) {
   try {
+    console.log("====================================");
+    console.log("registration");
+    console.log("====================================");
+
     const newUser = req.validatedBody;
 
-    // ✅ Перевірка чи користувач вже існує
-    const existingUser = await req.server.prisma.user.findUnique({
-      where: { email: newUser.email },
-    });
+    console.log("====================================");
+    console.log("registration", newUser);
+    console.log("====================================");
 
-    if (existingUser) {
-      return reply.code(409).send({
-        statusCode: 409,
-        error: "Conflict",
-        message: "Email already registered",
-      });
-    }
+    // ✅ Перевіряємо, чи існує користувач з таким email
+    // const existingUser = await req.server.prisma.user.findUnique({
+    //   where: { email: newUser.email },
+    // });
+
+    // if (existingUser) {
+    //   return reply.code(409).send({
+    //     statusCode: 409,
+    //     error: "Conflict",
+    //     message: "Email already registered",
+    //   });
+    // }
 
     // ✅ Хешуємо пароль
     const hashedPassword = await req.server.hash.password(newUser.password);
@@ -159,8 +107,7 @@ export const registrationHandler = async function (req, reply) {
         name: true,
         lastName: true,
         email: true,
-        role: true,
-        department: true,
+
         createdAt: true,
         updatedAt: true,
         isActive: true,

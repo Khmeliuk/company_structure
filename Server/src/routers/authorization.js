@@ -8,7 +8,7 @@ import { createUserInputSchema, loginSchema } from "../schema/user.schema.js";
 import { validateBody } from "../utils/validation.js";
 
 export default async function authorization(fastify, opt) {
-  fastify.route({
+  (fastify.route({
     method: "post",
     url: "/login",
     attachValidation: true,
@@ -27,7 +27,7 @@ export default async function authorization(fastify, opt) {
       preHandler: validateBody(createUserInputSchema),
       attachValidation: true,
       handler: registrationHandler,
-    });
+    }));
 
   fastify.route({
     method: "get",
