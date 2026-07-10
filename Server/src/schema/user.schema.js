@@ -5,7 +5,7 @@ export const createUserInputSchema = z
     name: z.string().trim().min(1, "Name is required"),
     lastName: z.string().trim().min(1, "Last name is required"),
     email: z.string().email("Invalid email").toLowerCase(),
-    password: z.string().min(5, "Min 5 chars").max(16, "Max 16 chars"),
+    password: z.string().min(5, "Min 5 chars"),
     isActive: z.boolean().default(false),
   })
   .strip();

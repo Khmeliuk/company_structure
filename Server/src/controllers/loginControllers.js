@@ -1,7 +1,5 @@
 import "dotenv/config";
 
-import fastify from "fastify";
-
 const cookieOptions = {
   httpOnly: true,
   maxAge: 3600, // Час життя cookie в секундах (1 година)
@@ -15,30 +13,23 @@ if (process.env.NODE_ENV === "production") {
 
 export const loginHandler = async function (req, reply) {
   try {
-    const user = await req.server.prisma.user.findUnique({
-      where: { email: req.body.email },
+    const user = await req.server.mongoose.models.User.findOne({
+      email: req.body.email,
     });
-    console.log("====================================");
-    console.log("login", user);
-    console.log("====================================");
 
     if (!user) {
       return reply.status(401).send("invalid login or password");
     }
 
-    const isValid = await user.comparePassword(req.body.password);
+    const isValid = await user.isValidPassword(req.body.password);
 
     if (!isValid) {
       return reply.status(401).send("invalid login or password");
     }
 
     const token = req.server.jwt.sign({
-      _id: user._id,
-      name: user.name,
-      lastName: user.lastName,
+      userId: user._id,
       email: user.email,
-      role: user.role,
-      department: user.department,
     });
 
     return reply
@@ -70,59 +61,22 @@ export const logoutHandler = async function (req, reply) {
 
 export const registrationHandler = async function (req, reply) {
   try {
-    console.log("====================================");
-    console.log("registration");
-    console.log("====================================");
-
     const newUser = req.validatedBody;
 
-    console.log("====================================");
-    console.log("registration", newUser);
-    console.log("====================================");
-
-    // ✅ Перевіряємо, чи існує користувач з таким email
-    // const existingUser = await req.server.prisma.user.findUnique({
-    //   where: { email: newUser.email },
-    // });
-
-    // if (existingUser) {
-    //   return reply.code(409).send({
-    //     statusCode: 409,
-    //     error: "Conflict",
-    //     message: "Email already registered",
-    //   });
-    // }
-
-    // ✅ Хешуємо пароль
-    const hashedPassword = await req.server.hash.password(newUser.password);
-
     // ✅ Створюємо користувача
-    const user = await req.server.prisma.user.create({
-      data: {
-        ...newUser,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        lastName: true,
-        email: true,
 
-        createdAt: true,
-        updatedAt: true,
-        isActive: true,
-      },
+    const user = await req.server.mongoose.models.User.create({
+      ...newUser,
     });
 
     // ✅ Логування (видалити в продакшені)
     req.server.log.info({ userId: user.id }, "New user registered");
 
-    // ✅ Генеруємо JWT токен (тільки необхідні дані)
+    // ✅ Генеруємо JWT токен
     const token = req.server.jwt.sign(
       {
-        userId: user.id,
+        userId: user._id,
         email: user.email,
-        role: user.role,
       },
       {
         expiresIn: "7d", // Опціонально: термін дії токена
@@ -145,16 +99,17 @@ export const registrationHandler = async function (req, reply) {
         user,
       });
   } catch (error) {
-    // ✅ Обробка Prisma помилки унікальності
-    if (error.code === "P2002") {
-      return reply.code(409).send({
-        statusCode: 409,
-        error: "Conflict",
-        message: "Email already exists",
+    console.log("====================================");
+    console.log("Error Cause:", error.cause);
+    console.log("====================================");
+    if (error.cause?.code === 11000) {
+      const duplicatedEmail = error.cause.keyValue?.email || "вказаним";
+      return reply.code(400).send({
+        status: "fail",
+        message: `Користувач із email: "${duplicatedEmail}" вже існує.`,
       });
     }
 
-    // ✅ Логування помилки
     req.server.log.error(
       {
         error: error.message,
