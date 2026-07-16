@@ -1,4 +1,5 @@
 import "dotenv/config";
+import User from "../models/user.js";
 
 const cookieOptions = {
   httpOnly: true,
@@ -13,27 +14,31 @@ if (process.env.NODE_ENV === "production") {
 
 export const loginHandler = async function (req, reply) {
   try {
-    const user = await req.server.mongoose.models.User.findOne({
-      email: req.body.email,
-    });
+
+ const user = await User.findOne({ email: req.body.email }).select('+password');
+    console.log('====================================');
+    console.log(user);
+    console.log('====================================');
 
     if (!user) {
-      return reply.status(401).send("invalid login or password");
+      return reply.code(401).send("invalid login or password");
     }
 
     const isValid = await user.isValidPassword(req.body.password);
 
     if (!isValid) {
-      return reply.status(401).send("invalid login or password");
+      return reply.code(401).send("invalid login or password");
     }
 
     const token = req.server.jwt.sign({
       userId: user._id,
+      name: user.name,  
+      lastName: user.lastName,
       email: user.email,
     });
 
     return reply
-      .status(201)
+      .code(201)
       .setCookie("token", token, {
         httpOnly: true,
         sameSite: "None",

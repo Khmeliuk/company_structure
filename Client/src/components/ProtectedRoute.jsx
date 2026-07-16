@@ -1,0 +1,17 @@
+import { Navigate } from "react-router-dom";
+import { useRefreshQuery } from "../hooks/reactQuery";
+
+const ProtectedRoute = ({ children }) => {
+  const { data: user, isLoading, isError } = useRefreshQuery();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (!user || isError) {
+    console.log("redirect to /Auth");
+
+    return <Navigate to="/Auth" />;
+  }
+
+  return children;
+};
+
+export default ProtectedRoute;

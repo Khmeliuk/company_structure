@@ -7,9 +7,7 @@ const authService = {
   },
 
   login: async (credentials) => {
-    console.log("====================================");
-    console.log("asdasdasdasda");
-    console.log("====================================");
+
     const response = await api.post("/auth/login", credentials);
     return response.data;
   },

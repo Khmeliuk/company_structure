@@ -7,6 +7,7 @@ import Navigation from "./pages/Navigation";
 import { useState } from "react";
 import initialDepartments from "./data/initialDepartments";
 import AuthPage from "./pages/AuthPage";
+import ProtectedLayout from "./components/ProtectedRoute"
 
 export default function App() {
   const [data, setData] = useState(initialDepartments);
@@ -22,11 +23,14 @@ export default function App() {
 
         <main className="max-w-7xl mx-auto">
           <Routes>
-            <Route path="/Auth" element={<AuthPage />} />
+               <Route path="/Auth" element={<AuthPage />} />
+             <Route path="/" element={<ProtectedLayout />}>
+         
             <Route path="/structure" element={<StructurePage data={data} />} />
             <Route path="/employees" element={<EmployeesPage data={data} />} />
             <Route path="/analytics" element={<AnalyticsPage data={data} />} />
             <Route path="*" element={<StructurePage data={data} />} />
+            </Route>
           </Routes>
         </main>
 

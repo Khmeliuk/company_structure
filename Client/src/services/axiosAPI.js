@@ -47,6 +47,9 @@ export const logout = async () => {
 
 export const refresh = async () => {
   try {
+    console.log('====================================');
+    console.log("ASDAsASAsaS");
+    console.log('====================================');
     const response = await axiosInstance.get("/auth/check");
     return response;
   } catch (error) {
