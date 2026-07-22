@@ -2,8 +2,12 @@ import { useState } from "react";
 import initialDepartments from "../data/initialDepartments";
 import DepartmentCard from "../components/DepartmentCard";
 
+
 const EmployeesPage = ({ data: initialData }) => {
   const [data, setData] = useState(initialData || initialDepartments);
+  console.log('====================================');
+  console.log("asdasdasd");
+  console.log('====================================');
 
   const updateTree = (node, targetId, callback) => {
     if (node.id === targetId) {
@@ -69,14 +73,16 @@ const EmployeesPage = ({ data: initialData }) => {
     );
   };
   return (
+   <> 
+   
     <div className="relative pb-60 flex justify-center py-20 px-10 overflow-auto">
-      <DepartmentCard
+        <DepartmentCard
         dept={data}
         onUpdateDept={handleUpdateDept}
         onDeleteDept={handleDeleteDept}
         onAddSubDept={handleAddSubDept}
       />
-    </div>
+    </div></>
   );
 };
 

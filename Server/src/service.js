@@ -10,6 +10,7 @@ import { z } from "zod";
 import authenticatePlugin from "./plugins/authenticatePlugin.js";
 import dbKeepalive from "./plugins/db-keepalive.js";
 import hashPlugin from "./plugins/hashPlugin.js";
+import departments from "./routers/department.js";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -63,6 +64,7 @@ fastify.register(dbKeepalive, { interval: 5 * 60 * 1000 });
 fastify.register(
   async function apiRoutes(fastify) {
     fastify.register(authorization, { prefix: "/auth" });
+    fastify.register(departments,{prefix:"/departments"})
   },
   { prefix: "/api/v1" },
 );

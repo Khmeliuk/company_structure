@@ -16,3 +16,4 @@ export const useAuthMutation = function (fetchFunction) {
     },
   });
 };
+
