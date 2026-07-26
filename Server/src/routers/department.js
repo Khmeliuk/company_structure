@@ -1,48 +1,24 @@
-
-import { 
-  createDepartmentHandler, 
-  updateDepartmentHandler, 
-  getDepartmentsHandler, 
-  getDepartmentByIdHandler, 
-  deleteDepartmentHandler 
+import {
+  getStructureHandler,
+  saveStructureHandler,
 } from "../controllers/department.handler.js";
-import { createDepartmentInputSchema, updateDepartmentInputSchema } from "../schema/department.schema.js";
+import { departmentSchema } from "../schema/department.schema.js";
+import { validateBody } from "../utils/validation.js";
 
-export default async function departments(fastify, opt) {
-  fastify.route({
-    method: "POST",
-    url: "/",
-    attachValidation: true,
-    preHandler: validateBody(createDepartmentInputSchema),
-    handler: createDepartmentHandler,
-  });
-
-  fastify.route({
-    method: "PATCH",
-    url: "/:id",
-    attachValidation: true,
-    preHandler: validateBody(updateDepartmentInputSchema),
-    handler: updateDepartmentHandler,
-  });
-
+export default async function companyRoutes(fastify, opt) {
+  // Отримати структуру компанії
   fastify.route({
     method: "GET",
-    url: "/",
-    attachValidation: true,
-    handler: getDepartmentsHandler,
+    url: "/structure",
+    handler: getStructureHandler,
   });
 
+  // Перезаписати / оновити структуру компанії
   fastify.route({
-    method: "GET",
-    url: "/:id",
+    method: "PUT",
+    url: "/structure",
     attachValidation: true,
-    handler: getDepartmentByIdHandler,
-  });
-
-  fastify.route({
-    method: "DELETE",
-    url: "/:id",
-    attachValidation: true,
-    handler: deleteDepartmentHandler,
+    preHandler: validateBody(departmentSchema),
+    handler: saveStructureHandler,
   });
 }

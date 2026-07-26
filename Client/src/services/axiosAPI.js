@@ -47,13 +47,36 @@ export const logout = async () => {
 
 export const refresh = async () => {
   try {
-    console.log('====================================');
+    console.log("====================================");
     console.log("ASDAsASAsaS");
-    console.log('====================================');
+    console.log("====================================");
     const response = await axiosInstance.get("/auth/check");
     return response;
   } catch (error) {
     console.error("Refresh error:", error);
     throw error; // або поверни null / false, якщо не хочеш кидати
+  }
+};
+
+export const getStructure = async () => {
+  try {
+    const response = await axiosInstance.get("/departments/structure");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching structure:", error);
+    throw error;
+  }
+};
+
+export const saveStructure = async (structureData) => {
+  try {
+    const response = await axiosInstance.put(
+      "/departments/structure",
+      structureData,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving structure:", error);
+    throw error;
   }
 };

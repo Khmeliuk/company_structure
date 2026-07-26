@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { refresh } from "../services/axiosAPI";
-
-
+import { getStructure } from "../services/axiosAPI";
 
 export const useGetCurrentUser = () => {
   const queryClient = useQueryClient();
@@ -14,12 +13,23 @@ export const useGetCurrentUser = () => {
   });
 };
 
-
-
 export const useRefreshQuery = () => {
   return useQuery({
     queryKey: ["user"],
     queryFn: refresh,
+    staleTime: Infinity, // дані ніколи не застарівають
+    cacheTime: Infinity, // кеш завжди тримається
+    refetchOnMount: false, // не оновлювати при монтуванні
+    refetchOnWindowFocus: false, // не оновлювати при поверненні вкладки
+    refetchOnReconnect: false, // не оновлювати при відновленні з’єднання
+    retry: false,
+  });
+};
+
+export const useGetStructure = () => {
+  return useQuery({
+    queryKey: ["structure"],
+    queryFn: getStructure,
     staleTime: Infinity, // дані ніколи не застарівають
     cacheTime: Infinity, // кеш завжди тримається
     refetchOnMount: false, // не оновлювати при монтуванні

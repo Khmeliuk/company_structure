@@ -17,3 +17,16 @@ export const useAuthMutation = function (fetchFunction) {
   });
 };
 
+export const useStructureMutation = function (fetchFunction) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: fetchFunction,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["structure"], data);
+    },
+    onError: (error) => {
+      console.error("Structure error:", error);
+    },
+  });
+};

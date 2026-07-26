@@ -1,13 +1,11 @@
 import { useState } from "react";
-import initialDepartments from "../data/initialDepartments";
+// import initialDepartments from "../data/initialDepartments";
 import DepartmentCard from "../components/DepartmentCard";
-
+import { useStructureMutation } from "../hooks/reactMutation";
 
 const EmployeesPage = ({ data: initialData }) => {
-  const [data, setData] = useState(initialData || initialDepartments);
-  console.log('====================================');
-  console.log("asdasdasd");
-  console.log('====================================');
+  const [data, setData] = useState(initialData);
+  const { mutate: saveStructure } = useStructureMutation(saveStructure);
 
   const updateTree = (node, targetId, callback) => {
     if (node.id === targetId) {
@@ -60,6 +58,11 @@ const EmployeesPage = ({ data: initialData }) => {
       staff: [],
       subDepartments: [],
     };
+    // Якщо батьківського ID немає — це створення самого першого (головного) відділу
+    if (!parentId || !data || !data.id) {
+      setData(newDept);
+      return;
+    }
     const updatedDept = updateTree(data, parentId, (node) => ({
       ...node,
       subDepartments: [...(node.subDepartments || []), newDept],
@@ -73,16 +76,16 @@ const EmployeesPage = ({ data: initialData }) => {
     );
   };
   return (
-   <> 
-   
-    <div className="relative pb-60 flex justify-center py-20 px-10 overflow-auto">
+    <>
+      <div className="relative pb-60 flex justify-center py-20 px-10 overflow-auto">
         <DepartmentCard
-        dept={data}
-        onUpdateDept={handleUpdateDept}
-        onDeleteDept={handleDeleteDept}
-        onAddSubDept={handleAddSubDept}
-      />
-    </div></>
+          dept={data}
+          onUpdateDept={handleUpdateDept}
+          onDeleteDept={handleDeleteDept}
+          onAddSubDept={handleAddSubDept}
+        />
+      </div>
+    </>
   );
 };
 

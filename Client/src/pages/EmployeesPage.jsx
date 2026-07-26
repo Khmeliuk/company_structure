@@ -1,9 +1,6 @@
-import { useState } from "react";
-import initialDepartments from "../data/initialDepartments";
 import EmployerStructure from "../components/EmployerStructure";
 
-const EmployeesPage = ({ data: initialData }) => {
-  const [data, setData] = useState(initialData || initialDepartments);
+const EmployeesPage = ({ data }) => {
   return <EmployerStructure data={data} />;
 };
 

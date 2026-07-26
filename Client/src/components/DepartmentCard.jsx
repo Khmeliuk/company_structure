@@ -14,6 +14,40 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isExpanded, setIsExpanded] = useState(true);
 
+  // -------------------------------------------------------------
+  // 1. ЗАХИСТ ТА СТВОРЕННЯ ПЕРШОГО ВІДДІЛУ (якщо dept порожній)
+  // -------------------------------------------------------------
+  if (!dept || !dept.id) {
+    return (
+      <div className="relative flex flex-col items-center my-10">
+        <div className="w-[360px] bg-white border-2 border-dashed border-[#0054a6]/40 rounded-[2rem] p-8 shadow-sm flex flex-col items-center text-center gap-4 hover:border-[#0054a6] transition-all">
+          <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-[#0054a6]">
+            <Shield size={32} />
+          </div>
+          <div>
+            <h3 className="font-black text-slate-800 uppercase italic text-base">
+              Структуру не створено
+            </h3>
+            <p className="text-slate-400 text-xs mt-1 font-medium">
+              Додайте головний відділ компанії (Генеральну дирекцію), щоб
+              розпочати
+            </p>
+          </div>
+          <button
+            onClick={() => onAddSubDept(null)} // Передаємо null для створення кореня
+            className="w-full py-3.5 bg-[#0054a6] hover:bg-[#004080] text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+          >
+            <Plus size={16} className="text-[#ffed00]" />
+            Створити головний відділ
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------
+  // 2. ОСНОВНА ЛОГІКА ДЛЯ ІСНУЮЧОГО ВІДДІЛУ
+  // -------------------------------------------------------------
   const openEdit = (emp, type) => {
     setEditingEmployee(emp);
     setModalType(type);
@@ -26,7 +60,7 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
       onUpdateDept(dept.id, { staff: [...(dept.staff || []), data] });
     } else if (modalType === "staff_edit") {
       onUpdateDept(dept.id, {
-        staff: dept.staff.map((s) => (s.id === data.id ? data : s)),
+        staff: (dept.staff || []).map((s) => (s.id === data.id ? data : s)),
       });
     }
     setModalType(null);
@@ -34,7 +68,9 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
   };
 
   const removeStaff = (id) => {
-    onUpdateDept(dept.id, { staff: dept.staff.filter((s) => s.id !== id) });
+    onUpdateDept(dept.id, {
+      staff: (dept.staff || []).filter((s) => s.id !== id),
+    });
   };
 
   return (
@@ -47,7 +83,7 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
             <input
               type="text"
               className="bg-transparent font-black text-slate-800 text-sm uppercase italic outline-none focus:border-b border-[#ffed00] w-full"
-              value={dept.name}
+              value={dept.name || ""}
               onChange={(e) => onUpdateDept(dept.id, { name: e.target.value })}
             />
           </div>
@@ -69,7 +105,7 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
               onClick={() => openEdit(dept.manager, "manager")}
               className="bg-blue-50 text-[#0054a6] px-3 py-1 rounded-full text-[9px] font-black uppercase hover:bg-[#ffed00] hover:text-slate-800 transition-all"
             >
-              Змінити
+              {dept.manager ? "Змінити" : "Додати"}
             </button>
           </div>
           {dept.manager ? (
@@ -78,7 +114,12 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
               className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-all group border border-transparent hover:border-slate-100"
             >
               <img
-                src={dept.manager.photo}
+                src={
+                  dept.manager.photo ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    dept.manager.name || "Manager",
+                  )}&background=0054a6&color=fff`
+                }
                 className="w-14 h-14 rounded-2xl border-2 border-[#ffed00] shadow-md object-cover"
                 alt="Manager"
               />
@@ -126,7 +167,12 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
                     onClick={() => openEdit(emp, "staff_edit")}
                   >
                     <img
-                      src={emp.photo}
+                      src={
+                        emp.photo ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          emp.name || "User",
+                        )}&background=64748b&color=fff`
+                      }
                       className="w-10 h-10 rounded-xl border border-white shadow-sm object-cover"
                       alt="Staff"
                     />
@@ -180,6 +226,7 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
         </div>
       </div>
 
+      {/* Модалка створення/редагування працівника */}
       {modalType && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-6 animate-in fade-in">
           <div className="w-full max-w-lg scale-in">
@@ -195,11 +242,12 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
         </div>
       )}
 
+      {/* Вкладені підрозділи */}
       {isExpanded && dept.subDepartments && dept.subDepartments.length > 0 && (
         <div className="relative pt-24 flex gap-20">
           <div className="absolute top-0 left-1/2 w-1 h-12 bg-[#0054a6]/20"></div>
           {dept.subDepartments.map((subDept, index) => (
-            <div key={subDept.id} className="relative">
+            <div key={subDept.id || index} className="relative">
               {dept.subDepartments.length > 1 && (
                 <div
                   className={`absolute top-[-48px] h-1 bg-[#0054a6]/20 
