@@ -4,12 +4,15 @@ import { z } from "zod";
 // Оскільки поля manager та staff однакові, перевикористовуємо одну схему
 export const personSchema = z
   .object({
-    name: z.string().trim().min(1, "Name is required"),
-    position: z.string().trim().min(1, "Position is required"),
-    phone: z.string().trim().min(1, "Phone is required"),
+    id: z.string().optional(),
+    name: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    position: z.string().optional().nullable(),
+    phone: z.string().optional().nullable(),
     hasCar: z.boolean().default(false),
-    carInfo: z.string().trim().optional(),
-    photo: z.string().url("Invalid photo URL").or(z.literal("")).optional(),
+    carInfo: z.string().optional().nullable(),
+    photo: z.string().optional().nullable(),
     notes: z.array(z.string()).default([]),
   })
   .strip();
@@ -17,22 +20,23 @@ export const personSchema = z
 // 2. Головна рекурсивна схема відділу
 export const departmentSchema = z
   .object({
+    id: z.string().optional(),
     name: z.string().trim().min(1, "Department name is required"),
-    manager: personSchema,
+    manager: personSchema.optional().nullable(), // дозволяє undefined або null
     staff: z.array(personSchema).default([]),
     subDepartments: z.array(z.lazy(() => departmentSchema)).default([]),
   })
   .strip();
 
 export const saveStructureInputSchema = z.object({
-  // Самі дані структури
-  structure: departmentSchema,
-  // Метадані про автора змін
-  updatedBy: z.object({
-    userId: z.string().min(1),
-    userName: z.string().min(1),
-    userEmail: z.string().email().optional(),
-  }),
+  data: departmentSchema, // змінено з 'structure' на 'data'
+  updatedBy: z
+    .object({
+      userId: z.string().optional(),
+      name: z.string().optional(),
+      lastName: z.string().optional(),
+    })
+    .optional(),
   changeReason: z.string().optional(),
 });
 

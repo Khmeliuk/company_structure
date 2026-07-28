@@ -5,8 +5,9 @@ const departmentHistorySchema = new mongoose.Schema(
     // Хто вніс зміни (користувач із вашої системи авторизації)
     updatedBy: {
       userId: { type: String, required: true },
-      userName: { type: String, required: true },
-      userEmail: { type: String },
+      name: { type: String, required: true },
+      lastName: { type: String, required: true },
+      userEmail: { type: String, required: true },
     },
     // Короткий опис або коментар до правки (опціонально)
     changeReason: { type: String, default: "Оновлення структури" },

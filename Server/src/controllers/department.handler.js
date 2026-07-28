@@ -3,6 +3,7 @@ import { Department } from "../models/structureCompany.js";
 
 export async function saveStructureHandler(request, reply) {
   const { structure, updatedBy, changeReason } = request.body;
+  console.log("saveStructure");
 
   // 1. Отримуємо поточний стан до оновлення
   const currentStructure = await Department.findOne();
