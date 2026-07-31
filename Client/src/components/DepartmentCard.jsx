@@ -17,7 +17,7 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
   // -------------------------------------------------------------
   // 1. ЗАХИСТ ТА СТВОРЕННЯ ПЕРШОГО ВІДДІЛУ (якщо dept порожній)
   // -------------------------------------------------------------
-  if (!dept || !dept.id) {
+  if (!dept || !dept._id) {
     return (
       <div className="relative flex flex-col items-center my-10">
         <div className="w-[360px] bg-white border-2 border-dashed border-[#0054a6]/40 rounded-[2rem] p-8 shadow-sm flex flex-col items-center text-center gap-4 hover:border-[#0054a6] transition-all">

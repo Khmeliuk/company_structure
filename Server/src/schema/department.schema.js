@@ -5,7 +5,6 @@ import { z } from "zod";
 export const personSchema = z
   .object({
     id: z.string().optional(),
-    name: z.string().optional(),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     position: z.string().optional().nullable(),
@@ -21,7 +20,7 @@ export const personSchema = z
 export const departmentSchema = z
   .object({
     id: z.string().optional(),
-    name: z.string().trim().min(1, "Department name is required"),
+    name: z.string().optional(),
     manager: personSchema.optional().nullable(), // дозволяє undefined або null
     staff: z.array(personSchema).default([]),
     subDepartments: z.array(z.lazy(() => departmentSchema)).default([]),

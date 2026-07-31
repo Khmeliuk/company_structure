@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const departmentSchema = new mongoose.Schema(
   {
@@ -7,7 +7,7 @@ const departmentSchema = new mongoose.Schema(
     staff: { type: Array, default: [] },
     subDepartments: { type: Array, default: [] },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export const Department = mongoose.model('Department', departmentSchema);
+export const Department = mongoose.model("Department", departmentSchema);

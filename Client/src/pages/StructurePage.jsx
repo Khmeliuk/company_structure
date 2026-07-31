@@ -1,17 +1,28 @@
-import { useState } from "react";
-// import initialDepartments from "../data/initialDepartments";
+import { useState, useEffect } from "react";
 import DepartmentCard from "../components/DepartmentCard";
 import { useStructureMutation } from "../hooks/reactMutation";
 import { saveStructure } from "../services/axiosAPI";
-import { useGetCurrentUser } from "../hooks/reactQuery";
+import { useGetCurrentUser, useGetStructure } from "../hooks/reactQuery";
 import Button from "@mui/material/Button";
 
-const StructurePage = ({ data: initialData }) => {
-  const [data, setData] = useState(initialData);
+const StructurePage = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const changeStructure = useStructureMutation(saveStructure);
 
   const { data: currentUser } = useGetCurrentUser();
+  const { data: structureData, isLoading, isSuccess } = useGetStructure();
+
+  const structure = structureData?.data;
+
+  // 1. Початковий стан
+  const [companyStructure, setCompanyStructure] = useState(structure || null);
+
+  // 2. Синхронізуємо локальний стан з даними React Query після завантаження
+  useEffect(() => {
+    if (structure && !isUpdate) {
+      setCompanyStructure(structure);
+    }
+  }, [structure, isUpdate]);
 
   const handleSaveStructure = () => {
     if (!currentUser || !currentUser.data) {
@@ -20,20 +31,19 @@ const StructurePage = ({ data: initialData }) => {
     }
 
     const updatedBy = {
-      userId: currentUser.data.id,
+      userId: currentUser.data.userId,
       name: currentUser.data.name,
       lastName: currentUser.data.lastName,
       userEmail: currentUser.data.email,
     };
 
-    const changeReason = "Оновлення структури"; 
-    const structureData = { data, updatedBy, changeReason };
-    console.log("====================================");
-    console.log(structureData, "structuredata");
-    console.log("====================================");
-    changeStructure.mutate(structureData, {
+    const changeReason = "Оновлення структури";
+    const payload = { data: companyStructure, updatedBy, changeReason };
+
+    changeStructure.mutate(payload, {
       onSuccess: (response) => {
         console.log("Structure saved successfully:", response);
+        setIsUpdate(false); // Скидаємо прапорець змін після успішного збереження
       },
       onError: (error) => {
         console.error("Error saving structure:", error);
@@ -41,10 +51,11 @@ const StructurePage = ({ data: initialData }) => {
     });
   };
 
+  // Рекурсивна функція для оновлення вузла
   const updateTree = (node, targetId, callback) => {
+    if (!node) return null;
     if (node.id === targetId) {
-      const updatedNode = callback(node);
-      return updatedNode;
+      return callback(node);
     }
     if (node.subDepartments) {
       return {
@@ -54,39 +65,35 @@ const StructurePage = ({ data: initialData }) => {
         ),
       };
     }
-
     return node;
   };
 
   const handleUpdateDept = (deptId, updatedFields) => {
-    const updatedDept = updateTree(data, deptId, (node) => ({
-      ...node,
-      ...updatedFields,
-    }));
-
-    // localStorage.setItem("companyData", JSON.stringify(updatedDept));
-    setData((prev) =>
+    setCompanyStructure((prev) =>
       updateTree(prev, deptId, (node) => ({ ...node, ...updatedFields })),
     );
-    setData(updatedDept);
     setIsUpdate(true);
   };
 
   const handleDeleteDept = (deptId) => {
     const removeFromTree = (node) => {
-      if (!node.subDepartments) return node;
-      const newDept = {
+      if (!node || !node.subDepartments) return node;
+      return {
         ...node,
         subDepartments: node.subDepartments
           .filter((sub) => sub.id !== deptId)
           .map(removeFromTree),
       };
-
-      // localStorage.setItem("companyData", JSON.stringify(newDept));
-      return newDept;
     };
-    if (data.id === deptId) return;
-    setData((prev) => removeFromTree(prev));
+
+    // Якщо намагаємося видалити самий перший (кореневий) відділ
+    if (companyStructure?.id === deptId) {
+      setCompanyStructure(null);
+      setIsUpdate(true);
+      return;
+    }
+
+    setCompanyStructure((prev) => removeFromTree(prev));
     setIsUpdate(true);
   };
 
@@ -98,36 +105,39 @@ const StructurePage = ({ data: initialData }) => {
       staff: [],
       subDepartments: [],
     };
-    // Якщо батьківського ID немає — це створення самого першого (головного) відділу
-    if (!parentId || !data || !data.id) {
-      setData(newDept);
+
+    // Створення найпершого кореневого відділу (якщо структура порожня)
+    if (!parentId || !companyStructure || !companyStructure.id) {
+      setCompanyStructure(newDept);
+      setIsUpdate(true);
       return;
     }
-    const updatedDept = updateTree(data, parentId, (node) => ({
-      ...node,
-      subDepartments: [...(node.subDepartments || []), newDept],
-    }));
 
-    // localStorage.setItem("companyData", JSON.stringify(updatedDept));
-    setData((prev) =>
+    setCompanyStructure((prev) =>
       updateTree(prev, parentId, (node) => ({
         ...node,
         subDepartments: [...(node.subDepartments || []), newDept],
       })),
     );
     setIsUpdate(true);
-    console.log(updatedDept, "updateTree node");
   };
+
+  if (isLoading)
+    return <div className="p-10 text-center">Завантаження структури...</div>;
+
   return (
     <>
       <div className="relative pb-60 flex justify-center py-20 px-10 overflow-auto">
-        <DepartmentCard
-          dept={data}
-          onUpdateDept={handleUpdateDept}
-          onDeleteDept={handleDeleteDept}
-          onAddSubDept={handleAddSubDept}
-        />
+        {
+          <DepartmentCard
+            dept={companyStructure}
+            onUpdateDept={handleUpdateDept}
+            onDeleteDept={handleDeleteDept}
+            onAddSubDept={handleAddSubDept}
+          />
+        }
       </div>
+
       <Button
         sx={{
           position: "fixed",
@@ -137,14 +147,15 @@ const StructurePage = ({ data: initialData }) => {
           borderRadius: "12px",
           boxShadow: 4,
           backgroundColor: "#63e45f",
+          "&:hover": {
+            backgroundColor: "#4bc647",
+          },
         }}
-        disabled={!isUpdate}
+        disabled={!isUpdate || changeStructure.isPending}
         variant="contained"
-        onClick={() => {
-          handleSaveStructure();
-        }}
+        onClick={handleSaveStructure}
       >
-        Зберегти
+        {changeStructure.isPending ? "Збереження..." : "Зберегти"}
       </Button>
     </>
   );

@@ -61,7 +61,7 @@ export const refresh = async () => {
 export const getStructure = async () => {
   try {
     const response = await axiosInstance.get("/departments/structure");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching structure:", error);
     throw error;
@@ -70,6 +70,9 @@ export const getStructure = async () => {
 
 export const saveStructure = async (structureData) => {
   try {
+    console.log("====================================");
+    console.log(structureData, "structureData");
+    console.log("====================================");
     const response = await axiosInstance.put(
       "/departments/structure",
       structureData,

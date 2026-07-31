@@ -2,8 +2,11 @@ import { DepartmentHistory } from "../models/departmentHistory.model.js";
 import { Department } from "../models/structureCompany.js";
 
 export async function saveStructureHandler(request, reply) {
-  const { structure, updatedBy, changeReason } = request.body;
-  console.log("saveStructure");
+  const { data, updatedBy, changeReason } = request.body;
+
+  console.log("====================================");
+  console.log(data, "data ");
+  console.log("====================================");
 
   // 1. Отримуємо поточний стан до оновлення
   const currentStructure = await Department.findOne();
@@ -30,7 +33,7 @@ export async function saveStructureHandler(request, reply) {
   }
 
   // 4. Оновлюємо основну структуру
-  const updated = await Department.findOneAndUpdate({}, structure, {
+  const updated = await Department.findOneAndUpdate({}, data, {
     new: true,
     upsert: true,
     setDefaultsOnInsert: true,
@@ -53,6 +56,7 @@ export async function getHistoryHandler(request, reply) {
 
 export async function getStructureHandler(request, reply) {
   const structure = await Department.findOne();
+
   if (!structure) {
     return reply.status(404).send({ error: "Structure not found" });
   }

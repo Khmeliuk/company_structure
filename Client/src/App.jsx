@@ -16,6 +16,7 @@ import { useEffect } from "react";
 
 export default function App() {
   const { data: user } = useGetCurrentUser();
+
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
@@ -34,10 +35,10 @@ export default function App() {
         <Routes>
           <Route path="/Auth" element={<AuthPage />} />
           <Route path="/" element={<ProtectedLayout />}>
-            <Route path="/structure" element={<StructurePage data={data} />} />
+            <Route path="/structure" element={<StructurePage />} />
             <Route path="/employees" element={<EmployeesPage data={data} />} />
             <Route path="/analytics" element={<AnalyticsPage data={data} />} />
-            <Route path="*" element={<StructurePage data={data} />} />
+            <Route path="*" element={<StructurePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

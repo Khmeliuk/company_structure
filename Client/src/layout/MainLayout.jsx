@@ -1,6 +1,6 @@
 import React from "react";
 import { PieChart, Shield, Users, LogOut } from "lucide-react";
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 
 import myLogo from "../assets/logo.png";
 import {
@@ -26,6 +26,8 @@ const MainLayout = () => {
   const queryClient = useQueryClient();
   const { notifyAuthUpdate } = useSyncAuthAcrossTabs();
 
+  const navigate = useNavigate();
+
   const navItems = [
     { path: "/structure", label: "Структура", icon: <Shield size={18} /> },
     { path: "/employees", label: "Працівники", icon: <Users size={18} /> },
@@ -36,6 +38,7 @@ const MainLayout = () => {
     await logout();
     queryClient.invalidateQueries(["user"]);
     notifyAuthUpdate();
+    navigate("/auth");
   };
 
   return (

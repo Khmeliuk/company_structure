@@ -104,7 +104,7 @@ export default function AuthForm() {
     console.log("====================================");
 
     mutation.mutate(payload, {
-      onSuccess: () => navigate("/outLogin"),
+      onSuccess: () => navigate("/structure"),
     });
   };
 

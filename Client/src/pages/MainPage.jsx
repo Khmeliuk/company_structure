@@ -11,7 +11,7 @@ const MainPage = () => {
     initialData: () => queryClient.getQueryData(["user"]), // Початкові дані з кешу
   });
 
-  return userData ? <Navigate to="/task" /> : <Navigate to="/auth" />;
+  return userData ? <Navigate to="/structure  " /> : <Navigate to="/auth" />;
 };
 
 export default MainPage;
