@@ -13,7 +13,9 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
   const [modalType, setModalType] = useState(null);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isExpanded, setIsExpanded] = useState(true);
-
+  console.log("====================================");
+  console.log(dept, "DepartmentCard");
+  console.log("====================================");
   // -------------------------------------------------------------
   // 1. ЗАХИСТ ТА СТВОРЕННЯ ПЕРШОГО ВІДДІЛУ (якщо dept порожній)
   // -------------------------------------------------------------
@@ -207,7 +209,7 @@ const DepartmentCard = ({ dept, onUpdateDept, onDeleteDept, onAddSubDept }) => {
         {/* Кнопки Дій */}
         <div className="grid grid-cols-2 border-t border-slate-100">
           <button
-            onClick={() => onAddSubDept(dept.id)}
+            onClick={() => onAddSubDept(dept._id)}
             className="py-4 text-[10px] font-black uppercase text-[#0054a6] hover:bg-blue-50 border-r border-slate-100 flex items-center justify-center gap-2 transition-colors"
           >
             <Plus size={14} className="text-[#ffed00] fill-current" /> Підрозділ

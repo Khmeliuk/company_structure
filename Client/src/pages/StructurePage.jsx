@@ -10,12 +10,17 @@ const StructurePage = () => {
   const changeStructure = useStructureMutation(saveStructure);
 
   const { data: currentUser } = useGetCurrentUser();
-  const { data: structureData, isLoading, isSuccess } = useGetStructure();
+  const { data: structureData, isLoading } = useGetStructure();
 
   const structure = structureData?.data;
 
   // 1. Початковий стан
   const [companyStructure, setCompanyStructure] = useState(structure || null);
+  const [newDept, setNewDept] = useState(null);
+
+  console.log("====================================");
+  console.log(companyStructure, "com;kljsaflkxajdl;akjd;lkaj");
+  console.log("====================================");
 
   // 2. Синхронізуємо локальний стан з даними React Query після завантаження
   useEffect(() => {
@@ -43,7 +48,7 @@ const StructurePage = () => {
     changeStructure.mutate(payload, {
       onSuccess: (response) => {
         console.log("Structure saved successfully:", response);
-        setIsUpdate(false); // Скидаємо прапорець змін після успішного збереження
+        setIsUpdate(false);
       },
       onError: (error) => {
         console.error("Error saving structure:", error);
@@ -53,11 +58,25 @@ const StructurePage = () => {
 
   // Рекурсивна функція для оновлення вузла
   const updateTree = (node, targetId, callback) => {
+    console.log("====================================");
+    console.log(targetId, "targetId");
+    console.log("====================================");
     if (!node) return null;
     if (node.id === targetId) {
       return callback(node);
     }
     if (node.subDepartments) {
+      console.log("====================================");
+      console.log(
+        {
+          ...node,
+          subDepartments: node.subDepartments.map((sub) =>
+            updateTree(sub, targetId, callback),
+          ),
+        },
+        "updateTree",
+      );
+      console.log("====================================");
       return {
         ...node,
         subDepartments: node.subDepartments.map((sub) =>
@@ -65,10 +84,15 @@ const StructurePage = () => {
         ),
       };
     }
+
     return node;
   };
 
   const handleUpdateDept = (deptId, updatedFields) => {
+    console.log("====================================");
+    console.log(deptId, updatedFields, "handleUpdateDept");
+    console.log("====================================");
+
     setCompanyStructure((prev) =>
       updateTree(prev, deptId, (node) => ({ ...node, ...updatedFields })),
     );
@@ -99,7 +123,7 @@ const StructurePage = () => {
 
   const handleAddSubDept = (parentId) => {
     const newDept = {
-      id: `dept-${Date.now()}`,
+      _id: `dept-${Date.now()}`,
       name: "Новий підрозділ",
       manager: null,
       staff: [],
@@ -107,11 +131,21 @@ const StructurePage = () => {
     };
 
     // Створення найпершого кореневого відділу (якщо структура порожня)
-    if (!parentId || !companyStructure || !companyStructure.id) {
+    if (!parentId || !companyStructure || !companyStructure._id) {
       setCompanyStructure(newDept);
       setIsUpdate(true);
       return;
     }
+    console.log("====================================");
+    console.log("handleAddSubDept");
+    console.log("====================================");
+    setNewDept();
+    setCompanyStructure((prev) =>
+      updateTree(prev, parentId, (node) => ({
+        ...node,
+        subDepartments: [...(node.subDepartments || []), newDept],
+      })),
+    );
 
     setCompanyStructure((prev) =>
       updateTree(prev, parentId, (node) => ({
